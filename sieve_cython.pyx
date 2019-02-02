@@ -1,3 +1,4 @@
+# cython: language_level=3
 from libc.math cimport sqrt
 from libc.stdlib cimport malloc, free
 

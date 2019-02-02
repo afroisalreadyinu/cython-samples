@@ -1,3 +1,4 @@
+# cython: language_level=3
 import math
 
 def sieve(up_to):
