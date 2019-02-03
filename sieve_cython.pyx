@@ -12,6 +12,10 @@ def sieve(up_to):
     free(primes)
     return response
 
+def no_return_sieve(up_to):
+    _sieve(up_to)
+    return None
+
 
 cdef bint *_sieve(int up_to):
     cdef int i, j
