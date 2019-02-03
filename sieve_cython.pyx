@@ -3,6 +3,8 @@ from libc.math cimport sqrt
 from libc.stdlib cimport malloc, free
 
 def sieve(up_to):
+    if up_to < 2:
+        return []
     cdef bint *primes = _sieve(up_to)
     response = [x for x in range(up_to+1) if primes[x]]
     # We are done with the malloc'd primes, so we should set it free to avoid

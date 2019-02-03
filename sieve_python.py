@@ -1,6 +1,8 @@
 import math
 
 def sieve(up_to):
+    if up_to < 2:
+        return []
     primes = [True for _ in range(up_to+1)]
     primes[0] = primes[1] = False
     upper_limit = int(math.sqrt(up_to))
