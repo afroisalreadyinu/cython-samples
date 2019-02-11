@@ -1,6 +1,6 @@
 // An implementation of the eight puzzle and breadth-first search to find a
 // solution. Install Glib 2 (libglib2.0-0 on debian/ubuntu), and compile with
-// gcc eight.c `pkg-config --cflags --libs glib-2.0`
+// gcc eight.c `pkg-config --cflags --libs glib-2.0` -o eight -O3
 // In order to profile, run with `perf ./eight start.txt`
 // and then `perf report`.
 
