@@ -1,19 +1,20 @@
 // An implementation of the eight puzzle and breadth-first search to find a
 // solution. Install Glib 2 (libglib2.0-0 on debian/ubuntu), and compile with
-// gcc eight.c `pkg-config --cflags --libs glib-2.0` -o eight -O3
+// gcc eight.c -o eight -O2
+// (weirdly enough, compiling with -O3 results in a much slower executable).
 // In order to profile, run with `perf ./eight start.txt`
 // and then `perf report`.
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glib.h>
 #include <stdbool.h>
 
 
 #define USAGE "Usage: eight <start-state-file>"
 
 #define BOARD_SIZE 3
+#define DATA_SIZE 9
 
 #define AbortIfNot(assertion, ...)       \
   if (!(assertion)) {			 \
@@ -34,6 +35,107 @@ typedef struct {
   State **children;
   short count;
 } ChildSet;
+
+typedef struct QueueNode {
+  State *state;
+  struct QueueNode *next;
+} QueueNode;
+
+typedef struct {
+  QueueNode *head;
+  QueueNode *tail;
+} Queue;
+
+typedef struct TreeNode{
+  int value;
+  struct TreeNode **children;
+} TreeNode;
+
+TreeNode *new_tree_node(short value) {
+  TreeNode *tn = malloc(sizeof(TreeNode));
+  tn->value = value;
+  tn->children = malloc((DATA_SIZE+1)*sizeof(TreeNode*));
+  tn->children[0] = NULL;
+  return tn;
+}
+
+TreeNode *new_tree_root() {
+  TreeNode *root = new_tree_node(-1);
+  return root;
+}
+
+TreeNode *tree_add_or_get_child(TreeNode *tn, short value) {
+  int i = 0;
+  for (; i < DATA_SIZE + 1; i++) {
+    if (tn->children[i] == NULL) break;
+    if (tn->children[i]->value == value) return tn->children[i];
+  }
+  TreeNode *child = new_tree_node(value);
+  tn->children[i] = child;
+  tn->children[i+1] = NULL;
+  return child;
+}
+
+TreeNode *tree_get_child(TreeNode *tn, short value) {
+  for (int i = 0; i < DATA_SIZE + 1; i++) {
+    if (tn->children[i] == NULL) return NULL;
+    if (tn->children[i]->value == value) return tn->children[i];
+  }
+  return NULL;
+}
+
+
+TreeNode *tree_add_board(TreeNode *root, short **board) {
+  TreeNode *current = root;
+  for (int row = 0; row <  BOARD_SIZE; row++) {
+    for (int col = 0; col <  BOARD_SIZE; col++) {
+      current = tree_add_or_get_child(current, board[row][col]);
+    }
+  }
+}
+
+TreeNode *tree_contains_board(TreeNode *root, short **board) {
+  TreeNode *current = root;
+  for (int row = 0; row <  BOARD_SIZE; row++) {
+    for (int col = 0; col <  BOARD_SIZE; col++) {
+      short value = board[row][col];
+      current = tree_get_child(current, value);
+      if (current == NULL) return false;
+    }
+  }
+}
+
+
+Queue *new_queue() {
+  Queue *q = malloc(sizeof(Queue));
+  q->head = NULL;
+  q->tail = NULL;
+  return q;
+}
+
+QueueNode *queue_push_right(Queue *queue, State *state) {
+  QueueNode *qn = malloc(sizeof(QueueNode));
+  qn->state = state;
+  qn->next = NULL;
+  if (queue->tail) queue->tail->next = qn;
+  queue->tail = qn;
+  if (queue->head == NULL) queue->head = qn;
+  return qn;
+}
+
+State *queue_pop_left(Queue *queue) {
+  QueueNode *old_head = queue->head;
+  State *retval = old_head->state;
+  queue->head = old_head->next;
+  if (queue->tail == old_head) queue->tail = NULL;
+  free(old_head);
+  return retval;
+}
+
+bool queue_is_empty(Queue *queue) {
+  return queue->head == NULL;
+}
+
 
 State *new_state(State const *parent) {
   State *state = malloc(sizeof(State));
@@ -172,25 +274,6 @@ bool is_final(State const *state) {
   return true;
 }
 
-char *state_to_string(State const *state) {
-  char *rows[BOARD_SIZE+1];
-  rows[BOARD_SIZE] = NULL;
-  for (int i=0; i< BOARD_SIZE; i++) {
-    char **row_string = malloc((BOARD_SIZE+1)*sizeof(char*));
-    row_string[BOARD_SIZE] = NULL;
-
-    for (int j=0; j< BOARD_SIZE; j++) {
-      row_string[j] = malloc(3*sizeof(char));
-    };
-    for (int j=0; j< BOARD_SIZE; j++) {
-      int length = sprintf(row_string[j], "%d", state->board[i][j]);
-      row_string[j][length] = '\0';
-    }
-    rows[i] = g_strjoinv("/", row_string);
-  }
-  return g_strjoinv("/", rows);
-}
-
 
 State *parse_file(const char *filename) {
   char *contents = read_state_file(filename);
@@ -200,23 +283,21 @@ State *parse_file(const char *filename) {
   return state;
 }
 
-State *main_loop(GQueue *queue) {
+State *main_loop(Queue *queue) {
   State *current_state;
-
-  static GHashTable *seen_set;
-  if (seen_set == NULL) seen_set = g_hash_table_new(g_str_hash, g_str_equal);
-  while (!g_queue_is_empty(queue)) {
-    current_state = (State *)g_queue_pop_head(queue);
+  TreeNode *seen_tree = new_tree_root();
+  while (!queue_is_empty(queue)) {
+    current_state = (State *)queue_pop_left(queue);
     if (is_final(current_state)) return current_state;
-    char *state_string = state_to_string(current_state);
-    if (g_hash_table_contains(seen_set, state_string)) continue;
-    g_hash_table_add(seen_set, state_string);
+    //char *state_string = state_to_string(current_state);
+    if (tree_contains_board(seen_tree, current_state->board)) continue;
+    tree_add_board(seen_tree, current_state->board);
 
     ChildSet child_set = get_children(current_state);
     for (int i=0; i < child_set.count; i++) {
       /* For depth-first: */
       /* g_queue_push_head(queue, child_set.children[i]); */
-      g_queue_push_tail(queue, child_set.children[i]);
+      queue_push_right(queue, child_set.children[i]);
     }
   }
   return NULL;
@@ -228,12 +309,13 @@ int main(int argc, const char* argv[]) {
     printf("%s\n", USAGE);
     exit(1);
   }
+  Queue *queue = new_queue();
   State *start_state = parse_file(argv[1]);
   if (!start_state) {
     return 1;
   }
-  GQueue *queue = g_queue_new();
-  g_queue_push_head(queue, start_state);
+  queue_push_right(queue, start_state);
+  //g_queue_push_head(queue, start_state);
   State *solution_state = main_loop(queue);
   if (!solution_state) {
     printf("No solution found\n");
