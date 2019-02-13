@@ -208,8 +208,10 @@ cdef State search(State start_state):
     return None
 
 
-def main():
-    with open (sys.argv[1], 'r') as inp_file:
+def main(filename=None):
+    if filename is None:
+        filename = sys.argv[1]
+    with open (filename, 'r') as inp_file:
         data = inp_file.read()
     state = State.from_file(data)
     found = search(state)
