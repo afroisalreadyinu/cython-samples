@@ -55,7 +55,7 @@ cdef class TreeNode:
         self.key = key
         self.children = []
 
-    def add_or_get_child(self, int key):
+    cpdef add_or_get_child(self, int key):
         for child in self.children:
             if child.key == key:
                 return child
@@ -63,7 +63,7 @@ cdef class TreeNode:
         self.children.append(new_child)
         return new_child
 
-    def get_child(self, int key):
+    cpdef get_child(self, int key):
         for child in self.children:
             if child.key == key:
                 return child

@@ -295,8 +295,6 @@ State *main_loop(Queue *queue) {
 
     ChildSet child_set = get_children(current_state);
     for (int i=0; i < child_set.count; i++) {
-      /* For depth-first: */
-      /* g_queue_push_head(queue, child_set.children[i]); */
       queue_push_right(queue, child_set.children[i]);
     }
   }
