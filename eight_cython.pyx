@@ -208,7 +208,7 @@ cdef State search(State start_state):
     return None
 
 
-if __name__ == "__main__":
+def main():
     with open (sys.argv[1], 'r') as inp_file:
         data = inp_file.read()
     state = State.from_file(data)
@@ -221,3 +221,6 @@ if __name__ == "__main__":
             node = node.parent
     else:
         print("Could not find solution")
+
+if __name__ == "__main__":
+    main()
