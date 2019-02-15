@@ -86,7 +86,6 @@ class State:
         raise ValueError("Invalid board")
 
 
-
     def children(self):
         possible_swaps = []
         row, column = self.zero_index
@@ -115,12 +114,6 @@ class State:
     def final(self):
         return self.board == FINAL
 
-
-    def __eq__(self, other):
-        return self.board == other.board
-
-    def __repr__(self):
-        return "< %r >" % self.sequence
 
     def __str__(self):
         parts = [' '.join(str(y) for y in x) for x in self.board]
