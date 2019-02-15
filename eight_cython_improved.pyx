@@ -157,7 +157,7 @@ cdef class State:
         self.board[swap.row][swap.column] = 0
 
 
-    cpdef children(self):
+    cpdef list children(self):
         cdef BoardPosition zi = self.zero_index()
         cdef BoardPosition *swaps = <BoardPosition *>malloc(4*sizeof(BoardPosition))
         cdef int swaps_counter = 0, index = 0
@@ -197,6 +197,8 @@ cdef class State:
 
 
 cdef State search(State start_state):
+    cdef TreeNode *processed
+    cdef State current, child
     queue = Queue()
     queue.push_right(start_state)
     processed = new_tree_node(-1)

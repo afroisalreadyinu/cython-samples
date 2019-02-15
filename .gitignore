@@ -3,3 +3,4 @@ __pycache__
 *_cython.c
 *.so
 *.html
+*.c
