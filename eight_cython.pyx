@@ -126,6 +126,12 @@ cdef class State:
             self.board[index] = <int *>malloc(SIZE*sizeof(int))
         self._zero_index.row = -1
 
+
+    def __dealloc__(self):
+        for index in range(SIZE):
+            free(self.board[index])
+        free(self.board)
+
     def __str__(self):
         parts = []
         for x in range(SIZE):
