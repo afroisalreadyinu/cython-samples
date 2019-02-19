@@ -2,7 +2,7 @@
 // solution. Install Glib 2 (libglib2.0-0 on debian/ubuntu), and compile with
 // gcc eight.c -o eight -O2
 // (weirdly enough, compiling with -O3 results in a much slower executable).
-// In order to profile, run with `perf ./eight start.txt`
+// In order to profile, run with `perf record ./eight start.txt`
 // and then `perf report`.
 
 #include <stdio.h>
