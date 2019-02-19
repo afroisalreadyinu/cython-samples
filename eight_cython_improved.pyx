@@ -8,9 +8,9 @@ cdef struct BoardPosition:
     int row
     int column
 
-cdef struct TreeNode:
+cdef struct TrieNode:
     int value
-    TreeNode **children
+    TrieNode **children
 
 cdef enum:
     SIZE = 3
@@ -52,28 +52,28 @@ cdef class Queue:
         return head_node.state
 
 
-cdef TreeNode *new_tree_node(int value):
-    cdef TreeNode *tn = <TreeNode *>malloc(sizeof(TreeNode))
+cdef TrieNode *new_trie_node(int value):
+    cdef TrieNode *tn = <TrieNode *>malloc(sizeof(TrieNode))
     tn.value = value
-    tn.children = <TreeNode **>malloc((DATA_SIZE+1) *sizeof(TreeNode*))
+    tn.children = <TrieNode **>malloc((DATA_SIZE+1) *sizeof(TrieNode*))
     tn.children[0] = NULL
     return tn
 
 
-cdef TreeNode *tree_add_or_get_child(TreeNode *tn, int value):
-    cdef TreeNode *child
+cdef TrieNode *trie_add_or_get_child(TrieNode *tn, int value):
+    cdef TrieNode *child
     cdef int index = 0
     for index in range(DATA_SIZE):
         if (tn.children[index] == NULL):
             break
         if (tn.children[index].value == value):
             return tn.children[index]
-    child = new_tree_node(value)
+    child = new_trie_node(value)
     tn.children[index] = child
     tn.children[index+1] = NULL
     return child
 
-cdef TreeNode *tree_get_child(TreeNode *tn, int value):
+cdef TrieNode *trie_get_child(TrieNode *tn, int value):
     cdef int index
     for index in range(DATA_SIZE):
         if (tn.children[index] == NULL):
@@ -82,20 +82,20 @@ cdef TreeNode *tree_get_child(TreeNode *tn, int value):
             return tn.children[index]
     return NULL
 
-cdef TreeNode *tree_add_board(TreeNode *root, int **board):
-    cdef TreeNode *current = root
+cdef TrieNode *trie_add_board(TrieNode *root, int **board):
+    cdef TrieNode *current = root
     cdef int row, col
     for row in range(SIZE):
         for col in range(SIZE):
-            current = tree_add_or_get_child(current, board[row][col])
+            current = trie_add_or_get_child(current, board[row][col])
 
-cdef bint tree_contains_board(TreeNode *root, int **board):
-    cdef TreeNode *current = root
+cdef bint trie_contains_board(TrieNode *root, int **board):
+    cdef TrieNode *current = root
     cdef int value
     for row in range(SIZE):
         for col in range(SIZE):
             value = board[row][col]
-            current = tree_get_child(current, value)
+            current = trie_get_child(current, value)
             if (current is NULL):
                 return False
     return True
@@ -203,18 +203,18 @@ cdef class State:
 
 
 cdef State search(State start_state):
-    cdef TreeNode *processed
+    cdef TrieNode *processed
     cdef State current, child
     queue = Queue()
     queue.push_right(start_state)
-    processed = new_tree_node(-1)
+    processed = new_trie_node(-1)
     while queue:
         current = queue.pop_left()
-        if tree_contains_board(processed, current.board):
+        if trie_contains_board(processed, current.board):
             continue
         if current.final():
             return current
-        tree_add_board(processed, current.board)
+        trie_add_board(processed, current.board)
         for child in current.children():
             queue.push_right(child)
     return None

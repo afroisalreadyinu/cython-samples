@@ -46,37 +46,37 @@ typedef struct {
   QueueNode *tail;
 } Queue;
 
-typedef struct TreeNode{
+typedef struct TrieNode{
   int value;
-  struct TreeNode **children;
-} TreeNode;
+  struct TrieNode **children;
+} TrieNode;
 
-TreeNode *new_tree_node(short value) {
-  TreeNode *tn = malloc(sizeof(TreeNode));
+TrieNode *new_trie_node(short value) {
+  TrieNode *tn = malloc(sizeof(TrieNode));
   tn->value = value;
-  tn->children = malloc((DATA_SIZE+1)*sizeof(TreeNode*));
+  tn->children = malloc((DATA_SIZE+1)*sizeof(TrieNode*));
   tn->children[0] = NULL;
   return tn;
 }
 
-TreeNode *new_tree_root() {
-  TreeNode *root = new_tree_node(-1);
+TrieNode *new_trie_root() {
+  TrieNode *root = new_trie_node(-1);
   return root;
 }
 
-TreeNode *tree_add_or_get_child(TreeNode *tn, short value) {
+TrieNode *trie_add_or_get_child(TrieNode *tn, short value) {
   int i = 0;
   for (; i < DATA_SIZE + 1; i++) {
     if (tn->children[i] == NULL) break;
     if (tn->children[i]->value == value) return tn->children[i];
   }
-  TreeNode *child = new_tree_node(value);
+  TrieNode *child = new_trie_node(value);
   tn->children[i] = child;
   tn->children[i+1] = NULL;
   return child;
 }
 
-TreeNode *tree_get_child(TreeNode *tn, short value) {
+TrieNode *trie_get_child(TrieNode *tn, short value) {
   for (int i = 0; i < DATA_SIZE + 1; i++) {
     if (tn->children[i] == NULL) return NULL;
     if (tn->children[i]->value == value) return tn->children[i];
@@ -85,21 +85,21 @@ TreeNode *tree_get_child(TreeNode *tn, short value) {
 }
 
 
-TreeNode *tree_add_board(TreeNode *root, short **board) {
-  TreeNode *current = root;
+TrieNode *trie_add_board(TrieNode *root, short **board) {
+  TrieNode *current = root;
   for (int row = 0; row <  BOARD_SIZE; row++) {
     for (int col = 0; col <  BOARD_SIZE; col++) {
-      current = tree_add_or_get_child(current, board[row][col]);
+      current = trie_add_or_get_child(current, board[row][col]);
     }
   }
 }
 
-TreeNode *tree_contains_board(TreeNode *root, short **board) {
-  TreeNode *current = root;
+TrieNode *trie_contains_board(TrieNode *root, short **board) {
+  TrieNode *current = root;
   for (int row = 0; row <  BOARD_SIZE; row++) {
     for (int col = 0; col <  BOARD_SIZE; col++) {
       short value = board[row][col];
-      current = tree_get_child(current, value);
+      current = trie_get_child(current, value);
       if (current == NULL) return false;
     }
   }
@@ -285,13 +285,13 @@ State *parse_file(const char *filename) {
 
 State *main_loop(Queue *queue) {
   State *current_state;
-  TreeNode *seen_tree = new_tree_root();
+  TrieNode *seen_trie = new_trie_root();
   while (!queue_is_empty(queue)) {
     current_state = (State *)queue_pop_left(queue);
     if (is_final(current_state)) return current_state;
     //char *state_string = state_to_string(current_state);
-    if (tree_contains_board(seen_tree, current_state->board)) continue;
-    tree_add_board(seen_tree, current_state->board);
+    if (trie_contains_board(seen_trie, current_state->board)) continue;
+    trie_add_board(seen_trie, current_state->board);
 
     ChildSet child_set = get_children(current_state);
     for (int i=0; i < child_set.count; i++) {

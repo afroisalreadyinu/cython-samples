@@ -47,7 +47,7 @@ cdef class Queue:
         return head_node.state
 
 
-cdef class TreeNode:
+cdef class TrieNode:
     cdef public int key
     cdef list children
 
@@ -59,7 +59,7 @@ cdef class TreeNode:
         for child in self.children:
             if child.key == key:
                 return child
-        new_child = TreeNode(key)
+        new_child = TrieNode(key)
         self.children.append(new_child)
         return new_child
 
@@ -70,11 +70,11 @@ cdef class TreeNode:
         return None
 
 
-cdef class Tree:
-    cdef TreeNode root
+cdef class Trie:
+    cdef TrieNode root
 
     def __init__(self):
-        self.root = TreeNode(-1)
+        self.root = TrieNode(-1)
 
     cdef add_board(self, int **board):
         cdef int value
@@ -201,7 +201,7 @@ cdef class State:
 cdef State search(State start_state):
     queue = Queue()
     queue.push_right(start_state)
-    processed = Tree()
+    processed = Trie()
     while queue:
         current = queue.pop_left()
         if processed.contains(current.board):

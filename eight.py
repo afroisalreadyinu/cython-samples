@@ -7,7 +7,7 @@ SIZE = 3
 DEFAULT_EMPTY_INDEX = (SIZE + 1)*(SIZE/2)
 FINAL = [list(range(i*SIZE, (i+1)*SIZE)) for i in range(SIZE)]
 
-class TreeNode:
+class TrieNode:
     def __init__(self, key):
         self.key = key
         self.kids = []
@@ -16,7 +16,7 @@ class TreeNode:
         for kid in self.kids:
             if kid.key == key:
                 return kid
-        new_kid = TreeNode(key)
+        new_kid = TrieNode(key)
         self.kids.append(new_kid)
         return new_kid
 
@@ -27,9 +27,9 @@ class TreeNode:
         return None
 
 
-class Tree:
+class Trie:
     def __init__(self):
-        self.root = TreeNode(None)
+        self.root = TrieNode(None)
 
     def add_board(self, board):
         current = self.root
@@ -127,7 +127,7 @@ class State:
 def search(node):
     queue = deque()
     queue.append(node)
-    processed = Tree()
+    processed = Trie()
     while queue:
         current = queue.popleft()
         if current.board in processed:
