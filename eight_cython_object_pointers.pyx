@@ -1,7 +1,7 @@
 # cython: language_level=3
 from libc.stdlib cimport malloc, free
 from libc.string cimport memcpy
-from cpython.ref cimport PyObject, Py_XINCREF
+from cpython.ref cimport PyObject, Py_XINCREF, Py_XDECREF
 
 import sys
 
@@ -213,6 +213,7 @@ cdef class State:
 cdef State search(State start_state):
     cdef TrieNode *processed
     cdef State current, child
+    cdef PyObject *temp
     cdef int index
     cdef ChildSet *current_children
     queue = Queue()
@@ -227,8 +228,10 @@ cdef State search(State start_state):
         trie_add_board(processed, current.board)
         current_children = current.children()
         for index in range(current_children.count):
-            child = <object>current_children.children[index]
+            temp = current_children.children[index]
+            child = <object>temp
             queue.push_right(child)
+            Py_XDECREF(temp)
     return None
 
 
