@@ -4,3 +4,9 @@ __pycache__
 *.so
 *.html
 *.c
+eight
+eight_cython
+eight_cython_improved
+eight_cython_object_pointers
+perf.data
+perf.data.old
