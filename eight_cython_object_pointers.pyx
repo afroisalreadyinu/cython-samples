@@ -229,7 +229,7 @@ cdef State search(State start_state):
         current_children = current.children()
         for index in range(current_children.count):
             temp = current_children.children[index]
-            child = <object>temp
+            child = <State>temp
             queue.push_right(child)
             Py_XDECREF(temp)
     return None

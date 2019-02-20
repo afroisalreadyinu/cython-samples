@@ -7,4 +7,4 @@ if [[ $# -ne 1 ]]; then
 fi
 
 python setup.py build_ext --inplace
-python -m timeit "import $1; $1.sieve(20000)"
+python -m timeit "import $1; $1.sieve(200000)"
