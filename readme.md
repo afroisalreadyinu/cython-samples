@@ -1,1 +1,1 @@
-Code repo for an upcoming blog post
+Code repo for the blog post [An Introduction to Cython, the Secret Python Extension with Superpowers](http://okigiveup.net/an-introduction-to-cython/)
