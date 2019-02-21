@@ -12,9 +12,8 @@ cdef struct TrieNode:
     int value
     TrieNode **children
 
-cdef enum:
-    SIZE = 3
-    DATA_SIZE = 9
+DEF SIZE = 3
+DEF DATA_SIZE = 9
 
 cdef class QueueNode:
     cdef State state

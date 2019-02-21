@@ -8,8 +8,7 @@ cdef struct BoardPosition:
     int row
     int column
 
-cdef enum:
-    SIZE = 3
+DEF SIZE = 3
 
 cdef class QueueNode:
     cdef State state

@@ -17,9 +17,8 @@ cdef struct ChildSet:
     PyObject **children
     int count
 
-cdef enum:
-    SIZE = 3
-    DATA_SIZE = 9
+DEF SIZE = 3
+DEF DATA_SIZE = 9
 
 cdef class QueueNode:
     cdef State state
